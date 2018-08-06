@@ -247,7 +247,7 @@ def main(argv):
     # get the command line arguments/options
     try:
         opts, args = getopt.getopt(argv, "e:p:d:b:v:c:",
-                                   ["email=", "pass=", "directory=", "books=", "videos=", "courses="])
+                                   ["email=", "pass=", "directory=", "books=", "videos=", "courses=", "full-path"])
     except getopt.GetoptError:
         print(error_message)
         sys.exit(2)
@@ -266,6 +266,8 @@ def main(argv):
             video_assets = arg
         elif opt in ('-c', '--courses'):
             course_assets = arg
+        elif opt in ('--full-path'):
+            full_path = True
 
     # do we have the minimum required info?
     if not email or not password:
@@ -319,10 +321,20 @@ def main(argv):
         if book_assets:
 
             # get the list of books
-            books_page = session.get("https://www.packtpub.com/account/my-ebooks", verify=True, headers=headers)
-            books_tree = html.fromstring(books_page.content)
-            book_nodes = books_tree.xpath(
-                "//div[@id='product-account-list']/div[contains(@class,'product-line unseen')]")
+            page = 1
+            books_page = session.get("https://www.packtpub.com/account/my-ebooks?page={0}".format(page), verify=True, headers=headers)
+            pages_tree = html.fromstring(books_page.content)
+            pages_nodes = pages_tree.xpath("//*[contains(@class,'solr-page-page-selector-page')]")
+            pages_max = (len(pages_nodes)) + 1
+
+            # loop over pages in PacktPub library
+            for page in range(pages_max):
+                page += 1
+                url = 'https://www.packtpub.com/account/my-ebooks?page='
+                url = (url + str(page))
+                books_page = session.get(url, verify=True, headers=headers)
+                books_tree = html.fromstring(books_page.content)
+                book_nodes = books_tree.xpath("//div[@id='product-account-list']/div[contains(@class,'product-line unseen')]")
 
             print('###########################################################################')
             print("FOUND {0} BOOKS: STARTING DOWNLOADS".format(len(book_nodes)))
@@ -331,7 +343,7 @@ def main(argv):
             # loop through the books
             for index, book in enumerate(book_nodes):
                 # download the book
-                books_directory = os.path.join(root_directory, "books")
+                books_directory = os.path.join(root_directory, "books") if not full_path else root_directory
                 print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
                 print('>>> Downloading book {0} of {1}'.format(index + 1, len(book_nodes)))
                 download_book(book, books_directory, book_assets, session, headers)
