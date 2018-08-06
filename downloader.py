@@ -7,6 +7,7 @@ import sys
 import getopt
 import json
 from lxml import html
+import importlib
 
 
 # saves downloaded asset to a directory
@@ -94,13 +95,7 @@ def download_book(book, directory, assets, session, headers):
         os.makedirs(book_directory)
 
     # the title sometimes contains some weird characters that python could not print
-    try:
-        print(title.encode(sys.stdout.encoding, errors='replace').decode())
-    except UnicodeDecodeError:
-        try:
-            print(title)
-        except:
-            print("(Problem decoding/printing title)")
+    print(title.encode(sys.stdout.encoding, errors='ignore').decode('unicode_escape').encode('utf-8'))
 
     # get the download links
     pdf = book.xpath(".//div[contains(@class,'download-container')]//a[contains(@href,'/pdf')]/@href")
@@ -395,4 +390,5 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    importlib.reload(sys)
     main(sys.argv[1:])
