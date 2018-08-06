@@ -7,7 +7,6 @@ import sys
 import getopt
 import json
 from lxml import html
-import importlib
 
 
 # saves downloaded asset to a directory
@@ -390,5 +389,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    importlib.reload(sys)
     main(sys.argv[1:])
