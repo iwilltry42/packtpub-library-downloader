@@ -94,7 +94,13 @@ def download_book(book, directory, assets, session, headers):
         os.makedirs(book_directory)
 
     # the title sometimes contains some weird characters that python could not print
-    print(title.encode(sys.stdout.encoding, errors='replace').decode())
+    try:
+        print(title.encode(sys.stdout.encoding, errors='replace').decode())
+    except UnicodeDecodeError:
+        try:
+            print(title)
+        except:
+            print("(Problem decoding/printing title)")
 
     # get the download links
     pdf = book.xpath(".//div[contains(@class,'download-container')]//a[contains(@href,'/pdf')]/@href")
