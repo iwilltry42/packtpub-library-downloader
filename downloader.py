@@ -328,25 +328,24 @@ def main(argv):
             pages_max = (len(pages_nodes)) + 1
 
             # loop over pages in PacktPub library
-            for page in range(pages_max):
-                page += 1
+            for page in range(1, pages_max+1):
                 url = 'https://www.packtpub.com/account/my-ebooks?page='
                 url = (url + str(page))
                 books_page = session.get(url, verify=True, headers=headers)
                 books_tree = html.fromstring(books_page.content)
                 book_nodes = books_tree.xpath("//div[@id='product-account-list']/div[contains(@class,'product-line unseen')]")
 
-            print('###########################################################################')
-            print("FOUND {0} BOOKS: STARTING DOWNLOADS".format(len(book_nodes)))
-            print('###########################################################################')
+                print('###########################################################################')
+                print("PAGE {0}/{1} -> FOUND {2} BOOKS: STARTING DOWNLOADS".format(page, pages_max, len(book_nodes)))
+                print('###########################################################################')
 
-            # loop through the books
-            for index, book in enumerate(book_nodes):
-                # download the book
-                books_directory = os.path.join(root_directory, "books") if not full_path else root_directory
-                print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-                print('>>> Downloading book {0} of {1}'.format(index + 1, len(book_nodes)))
-                download_book(book, books_directory, book_assets, session, headers)
+                # loop through the books
+                for index, book in enumerate(book_nodes):
+                    # download the book
+                    books_directory = os.path.join(root_directory, "books") if not full_path else root_directory
+                    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+                    print('>>> Downloading book {0} of {1}'.format(index + 1, len(book_nodes)))
+                    download_book(book, books_directory, book_assets, session, headers)
 
         if video_assets:
 
